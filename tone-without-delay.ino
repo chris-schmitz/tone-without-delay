@@ -1,27 +1,25 @@
 #include <Adafruit_NeoPixel.h>
 #include "pitches.h"
 
-Adafruit_NeoPixel bar = Adafruit_NeoPixel(8, 2, NEO_GRB + NEO_KHZ800);
-
 const int SPEAKER = 3;
+const int LEDs = 2;
 
-// notes in the melody:
+Adafruit_NeoPixel bar = Adafruit_NeoPixel(8, LEDs, NEO_GRB + NEO_KHZ800);
+
+// * State management for the tones
 int melody[] = {
     NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4, 0};
 
-// note durations: 4 = quarter note, 8 = eighth note, etc.:
 int noteDurations[] = {
     4, 8, 8, 4, 4, 4, 4, 4, 4};
-
 unsigned long previousMillis = 0;
-
 long pauseBetweenNotes = 100;
 long noteDuration = 100;
-
 const long interval = pauseBetweenNotes;
 boolean outputTone = false; // Records current state
 int thisNote = 0;
 
+// * State management for the lights
 const int lightInterval = 50;
 unsigned long previousLightMillis = 0;
 uint8_t lightIndex = 0;
@@ -41,43 +39,15 @@ void setup()
     showReady();
 }
 
-void handleLights(unsigned long currentMillis)
-{
-
-    if (currentMillis - previousLightMillis >= lightInterval)
-    {
-        if (lightOn)
-        {
-            bar.setPixelColor(lightIndex, cyan);
-        }
-        else
-        {
-            bar.setPixelColor(lightIndex, lightsOff);
-        }
-        bar.show();
-
-        if (lightIndex < 8)
-        {
-            lightIndex++;
-        }
-        else
-        {
-            lightIndex = 0;
-            lightOn = !lightOn;
-        }
-
-        previousLightMillis = currentMillis;
-    }
-}
-
 void loop()
 {
     unsigned long currentMillis = millis();
 
-    // handleLights(currentMillis);
+    handleLights(currentMillis);
 
     // * pulled and modified from the stack overflow post:
     // * https://arduino.stackexchange.com/questions/17355/playing-melody-with-tone-without-using-delay
+
     if (outputTone)
     {
         // We are currently outputting a tone
@@ -95,9 +65,11 @@ void loop()
         // We are currently in a pause
         // Check if it's been long enough and turn on if so
         // ? I'm assuming we want to keep this as a standard duration. should it be?
+
         if (currentMillis - previousMillis >= pauseBetweenNotes)
         {
             previousMillis = currentMillis;
+
             int currentNote = melody[thisNote];
             if (currentNote != 0)
             {
@@ -109,7 +81,7 @@ void loop()
             }
             outputTone = true;
 
-            if (thisNote <= 8)
+            if (thisNote < 8)
             {
                 thisNote++;
             }
@@ -156,5 +128,34 @@ void showReady()
         delay(pauseBetweenNotes);
         // stop the tone playing:
         noTone(SPEAKER);
+    }
+}
+
+void handleLights(unsigned long currentMillis)
+{
+
+    if (currentMillis - previousLightMillis >= lightInterval)
+    {
+        if (lightOn)
+        {
+            bar.setPixelColor(lightIndex, cyan);
+        }
+        else
+        {
+            bar.setPixelColor(lightIndex, lightsOff);
+        }
+        bar.show();
+
+        if (lightIndex < 8)
+        {
+            lightIndex++;
+        }
+        else
+        {
+            lightIndex = 0;
+            lightOn = !lightOn;
+        }
+
+        previousLightMillis = currentMillis;
     }
 }
