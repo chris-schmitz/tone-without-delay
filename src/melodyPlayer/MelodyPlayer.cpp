@@ -3,13 +3,13 @@
 MelodyPlayer::MelodyPlayer(uint8_t pin)
 {
     speakerPin = pin;
-
-    int melody_shaveAndAHairCut[] = {
-        NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4, 0};
-
-    int durations_shaveAndAHairCut[] = {
-        4, 8, 8, 4, 4, 4, 4, 4, 4};
 }
+
+int MelodyPlayer::melody_shaveAndAHairCut[] = {
+    NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4, 0};
+
+int MelodyPlayer::durations_shaveAndAHairCut[] = {
+    4, 8, 8, 4, 4, 4, 4, 4, 4};
 
 void MelodyPlayer::playMelody(MELODY name)
 {

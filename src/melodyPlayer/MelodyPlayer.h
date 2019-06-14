@@ -16,8 +16,8 @@ class MelodyPlayer
 {
     uint8_t speakerPin;
 
-    int melody_shaveAndAHairCut[9];
-    int durations_shaveAndAHairCut[9];
+    static int melody_shaveAndAHairCut[];
+    static int durations_shaveAndAHairCut[];
     int *activeMelody;
     int *activeDurations;
 
