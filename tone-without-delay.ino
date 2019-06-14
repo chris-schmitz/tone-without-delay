@@ -29,10 +29,10 @@ uint32_t cyan = bar.Color(0, 255, 255);
 
 void setup()
 {
-    // player.playMelody(READY);
+    player.playMelody(READY);
     Serial.begin(9600);
-    while (!Serial)
-        ;
+    // while (!Serial)
+    //     ;
     bar.begin();
     bar.show();
     showReady();
@@ -40,7 +40,18 @@ void setup()
 
 void loop()
 {
-    player.playMelody(SHAVE_AND_A_HAIRCUT);
+    Serial.println("Playing: Ready");
+    player.playMelody(READY);
+    delay(1000);
+    Serial.println("Playing: Processing");
+    player.playMelody(PROCESSING);
+    delay(1000);
+    Serial.println("Playing: Complete");
+    player.playMelody(COMPLETE);
+    delay(1000);
+    Serial.println("Playing: Idle");
+    player.playMelody(IDLE);
+    delay(3000);
     // unsigned long currentMillis = millis();
 
     // handleLights(currentMillis);
