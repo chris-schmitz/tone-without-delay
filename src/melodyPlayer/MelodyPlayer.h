@@ -43,11 +43,22 @@ class MelodyPlayer
     int activeLength;
     int *activeMelody;
     int *activeDurations;
+    // | hmmm, consider whether you're going to underscore private props or
+    // | not, don't leave it both
+    unsigned long _currentMillis = 0;
+    unsigned long _nextChange = 0;
+    const long _noteDuration = 100;
+    const long _pauseBetweenNotes = 100;
+    boolean _notePlaying = false;
+    int _activeNote = 0;
 
+    void _setActiveMelody(MELODY name);
     void _playMelody();
+    void _playMelodyWithoutDelay();
 
 public:
     MelodyPlayer(uint8_t speakerPin);
     void playMelody(MELODY name);
+    void playMelody(MELODY name, unsigned long currentMillis);
 };
 #endif
