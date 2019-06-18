@@ -146,7 +146,7 @@ void MelodyPlayer::_playMelodyWithoutDelay()
         _activeNote++;
         Serial.print("activeNote after increment: ");
         Serial.println(_activeNote);
-        if (_activeNote > activeLength)
+        if (_activeNote >= activeLength)
         {
             _activeNote = 0;
         }
