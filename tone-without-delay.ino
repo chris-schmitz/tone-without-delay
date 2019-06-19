@@ -1,3 +1,25 @@
+/**
+ * | Tone without delay!
+ *
+ * * This is a proof of concept I used to work thorugh the state machine logic I wanted to used
+ * * for the tones in the pegasus project. The TunePlayer class is def built with the pegasus project
+ * * in mind, so it's intentionally not made to accept a variety of melodies and allow for their playback.
+ * * The class could def be refactored to do that, but that's something I'm leaving for future me.
+ *
+ * * Also, I'm sure something like TunePlayer already exists out there, but I couldn't find code for doing this
+ * * on a brief scan of the internet and, ultimately, the point of this proof of concept and the whole Pegasus
+ * * project is an excuse for me to learn a bunch of concepts and approaches in a more practical way.
+ *
+ * * All of this to say: if you're looking at this proof of concept, know that it's not really meant to be
+ * * generically used and it doesn't necessarily apply best practices.
+ *
+ * * The Pegasus project:
+ * ^ https://github.com/chris-schmitz/pegasus
+ *
+ * * also, there are a bunch of comments in here that are better read via vscode using the Better Comments extension:
+ * ^ https://marketplace.visualstudio.com/items?itemName=aaron-bond.better-comments
+ */
+
 #include <Adafruit_NeoPixel.h>
 #include "src/tunePlayer/TunePlayer.h"
 
