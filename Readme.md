@@ -17,5 +17,3 @@ I already have a proof of concept (in the pegasus project folder) for handling t
 The TunePlayer class is just an abstraction of a state machine. It will let you tell it which of a select few tunes (tunes = melody + durations + tone) you'd like to play and when you tell it to play without delay it will, you know, play the tune without delay and tt will only play the tune once.
 
 The code is _kindof_ well commented, but the comments are aimed at future me, not necessarily at a wider audience, so I hope but cannot guarantee they'll be helpful ;P
-
-a
