@@ -7,16 +7,6 @@ const int LEDs = 2;
 MelodyPlayer player = MelodyPlayer(SPEAKER);
 Adafruit_NeoPixel bar = Adafruit_NeoPixel(8, LEDs, NEO_GRB + NEO_KHZ800);
 
-// * State management for the tones
-
-// * shave and a hair cut
-// unsigned long previousMillis = 0;
-// long pauseBetweenNotes = 100;
-// long noteDuration = 100;
-// // const long interval = pauseBetweenNotes; // to cut
-// boolean outputTone = false; // Records current state
-// int thisNote = 0;
-
 // * State management for the lights
 const int lightInterval = 50;
 unsigned long previousLightMillis = 0;
@@ -27,12 +17,24 @@ boolean lightOn = true;
 uint32_t lightsOff = bar.Color(0, 0, 0);
 uint32_t cyan = bar.Color(0, 255, 255);
 
+// * game state
+enum gameStates
+{
+    GS_IDLE = 0,
+    GS_START,
+    GS_PROCESSING,
+    GS_COMPLETE,
+};
+gameStates currentGameState = GS_IDLE;
+
+MELODY melodyToPlay;
+
 void setup()
 {
     player.playMelody(READY);
     Serial.begin(9600);
-    while (!Serial)
-        ;
+    // while (!Serial)
+    //     ;
     bar.begin();
     bar.show();
     showReady();
@@ -40,78 +42,48 @@ void setup()
 
 void loop()
 {
-    Serial.println("top of loop");
-    // * Testing each of the melodies
-    // Serial.println("Playing: Ready");
-    // player.playMelody(READY);
-    // delay(1000);
-    // Serial.println("Playing: Processing");
-    // player.playMelody(PROCESSING);
-    // delay(1000);
-    // Serial.println("Playing: Complete");
-    // player.playMelody(COMPLETE);
-    // delay(1000);
-    // Serial.println("Playing: Idle");
-    // player.playMelody(IDLE);
-    // delay(3000);
-
     unsigned long currentMillis = millis();
     handleLights(currentMillis);
 
-    Serial.println("========== Playing idle ==========");
-    player.playMelody(IDLE, currentMillis);
-    Serial.println("========== Done Playing idle ==========");
+    // | is the current tone playing the same as the current state? Note that the player should retain the state even after song is played
+    // * mapping the game state enum to the melody enum, really we could prob
+    // * conflate the two enums, but I kind of like the flexibility of mapping
+    // * them together for now
+    switch (currentGameState)
+    {
+    case GS_IDLE:
+        melodyToPlay = IDLE;
+        break;
+    case GS_START:
+        melodyToPlay = READY;
+        break;
+    case GS_PROCESSING:
+        melodyToPlay = PROCESSING;
+        break;
+    case GS_COMPLETE:
+        melodyToPlay = COMPLETE;
+        break;
+    }
 
-    // ! to cut
-
-    //* pulled and modified from the stack overflow post:
-    //* https://arduino.stackexchange.com/questions/17355/playing-melody-with-tone-without-using-delay
-    // if (outputTone)
-    // {
-    //     // We are currently outputting a tone
-    //     // Check if it's been long enough and turn off if so
-
-    //     if (currentMillis - previousMillis >= noteDuration)
-    //     {
-    //         previousMillis = currentMillis;
-    //         noTone(SPEAKER);
-    //         outputTone = false;
-    //     }
-    // }
-    // else
-    // {
-    //     // We are currently in a pause
-    //     // Check if it's been long enough and turn on if so
-    //     // ? I'm assuming we want to keep this as a standard duration. should it be?
-
-    //     if (currentMillis - previousMillis >= pauseBetweenNotes)
-    //     {
-    //         previousMillis = currentMillis;
-
-    //         int currentNote = melody[thisNote];
-    //         if (currentNote != 0)
-    //         {
-    //             tone(SPEAKER, currentNote);
-    //         }
-    //         else
-    //         {
-    //             noTone(SPEAKER);
-    //         }
-    //         outputTone = true;
-
-    //         if (thisNote < 8)
-    //         {
-    //             thisNote++;
-    //         }
-    //         else
-    //         {
-    //             thisNote = 0;
-    //         }
-
-    //         // * figure out the duration for the new note
-    //         noteDuration = 1000 / noteDurations[thisNote];
-    //     }
-    // }
+    if (player.currentMelody == melodyToPlay)
+    {
+        // | yes => continue playing
+        Serial.println("in the if ");
+        player.playMelodyWithoutDelay();
+    }
+    else
+    {
+        Serial.println("in the else ");
+        // ^ no:
+        // ^ stop playing current melody
+        player.stopPlaying();
+        // ^ reset player state (playcount, active note, anything else?)
+        player.reset();
+        // ^ set the new melody
+        player.setActiveMelody(melodyToPlay);
+        // ^ trigger play (will play once and stop)
+        player.playMelodyWithoutDelay();
+    }
 }
 
 void showReady()

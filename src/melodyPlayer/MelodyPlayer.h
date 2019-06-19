@@ -3,6 +3,7 @@
 #include "pitches.h"
 #include "Arduino.h"
 
+// * yeeaaaaahhhhhhhhyouneedtoprefixthis
 enum MELODY
 {
     SHAVE_AND_A_HAIRCUT = 0,
@@ -51,14 +52,19 @@ class MelodyPlayer
     const long _pauseBetweenNotes = 100;
     boolean _notePlaying = false;
     int _activeNote = 0;
+    boolean _playComplete = false;
 
-    void _setActiveMelody(MELODY name);
     void _playMelody();
     void _playMelodyWithoutDelay();
 
 public:
     MelodyPlayer(uint8_t speakerPin);
     void playMelody(MELODY name);
-    void playMelody(MELODY name, unsigned long currentMillis);
+    void setActiveMelody(MELODY name);
+    void playMelodyWithoutDelay();
+    void stopPlaying();
+    void reset();
+    boolean playingMelody = false;
+    MELODY currentMelody = READY; // * consider a rename
 };
 #endif

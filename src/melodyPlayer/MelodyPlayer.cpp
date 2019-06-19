@@ -47,20 +47,30 @@ int MelodyPlayer::durations_IDLE[] = {
  */
 void MelodyPlayer::playMelody(MELODY name)
 {
-    _setActiveMelody(name);
+    setActiveMelody(name);
     _playMelody();
 }
 
-void MelodyPlayer::playMelody(MELODY name, unsigned long currentMillis)
+void MelodyPlayer::playMelodyWithoutDelay()
 {
-    Serial.println("Top of public play melody overload");
-    _currentMillis = currentMillis;
-    _setActiveMelody(name);
-    _playMelodyWithoutDelay();
+    if (playingMelody == true)
+    // if (playingMelody == true && _playComplete == false)
+    {
+        _currentMillis = millis();
+        _playMelodyWithoutDelay();
+    }
+}
+void MelodyPlayer::stopPlaying()
+{
+    playingMelody = false;
+}
 
-    // TODO: I feel like it's something around here.
-    // ! after we're done playing the melody, do we need to reset the state so that
-    // ! we get the right active melody?
+void MelodyPlayer::reset()
+{
+    _activeNote = 0;
+    _playComplete = false;
+    activeLength = 0;
+    // ? anything else to reset?
 }
 
 /**
@@ -70,7 +80,6 @@ void MelodyPlayer::playMelody(MELODY name, unsigned long currentMillis)
  */
 void MelodyPlayer::_playMelody()
 {
-    Serial.println("Playing Melody");
     // * pulled from the toneMelody arduino example
     for (int thisNote = 0; thisNote < activeLength; thisNote++)
     {
@@ -96,75 +105,58 @@ void MelodyPlayer::_playMelody()
 
 void MelodyPlayer::_playMelodyWithoutDelay()
 {
-    Serial.println("Top of private play melody");
     // * Not ready for change, kick out early
-    Serial.print("_currentMillis: ");
-    Serial.println(_currentMillis);
-    Serial.print("_nextChange: ");
-    Serial.println(_nextChange);
     if (_currentMillis < _nextChange)
     {
-        Serial.println("early return");
         return;
     }
 
     unsigned long millisTillNextChange = 0;
 
-    Serial.print("Note playing: ");
-    Serial.println(_notePlaying);
-
     if (_notePlaying)
     {
         millisTillNextChange = _pauseBetweenNotes;
         noTone(speakerPin);
+        if (_playComplete)
+        {
+
+            playingMelody = false;
+        }
     }
     else
     {
-        Serial.println("top of else clause");
         millisTillNextChange = 1000 / activeDurations[_activeNote];
-        Serial.print("millisTillNextChange: ");
-        Serial.println(millisTillNextChange);
-        Serial.print("activeNote: ");
-        Serial.println(_activeNote);
-        Serial.print("activeMelody: ");
-        Serial.println(*activeMelody);
 
         if (activeMelody[_activeNote] != 0)
         {
-            Serial.println("playing note");
             int note = activeMelody[_activeNote];
-            Serial.print("note: ");
-            Serial.println(note);
             tone(speakerPin, note);
         }
         else
         {
-            Serial.println("playing blank note");
             noTone(speakerPin);
         }
 
         _activeNote++;
-        Serial.print("activeNote after increment: ");
-        Serial.println(_activeNote);
         if (_activeNote >= activeLength)
         {
             _activeNote = 0;
+            _playComplete = true;
         }
-        Serial.println("End of else clause");
     }
 
-    Serial.print("millisTillNextChange: ");
-    Serial.println(millisTillNextChange);
     _notePlaying = !_notePlaying;
     _nextChange = _currentMillis + millisTillNextChange;
-    Serial.print("_nextChange at the end of the method: ");
-    Serial.println(_nextChange);
 }
 
-void MelodyPlayer::_setActiveMelody(MELODY name)
+void MelodyPlayer::setActiveMelody(MELODY name)
 {
-    Serial.print("Name: ");
-    Serial.println(name);
+    // ?! is this the right spot for this??
+    // * naming wise I don't think it is, but logic wise it might be
+    // TODO: consder if this needs a rename or moving the trigger out
+    playingMelody = true;
+
+    currentMelody = name;
     switch (name)
     {
     case SHAVE_AND_A_HAIRCUT:
