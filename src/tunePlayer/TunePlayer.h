@@ -1,19 +1,18 @@
-#ifndef MELODY_PLAYER
-#define MELODY_PLAYER
+#ifndef TUNE_PLAYER
+#define TUNE_PLAYER
 #include "pitches.h"
 #include "Arduino.h"
 
-// * yeeaaaaahhhhhhhhyouneedtoprefixthis
 enum MELODY
 {
-    SHAVE_AND_A_HAIRCUT = 0,
-    IDLE,
-    READY,
-    PROCESSING,
-    COMPLETE,
+    MELODY_SHAVE_AND_A_HAIRCUT = 0,
+    MELODY_IDLE,
+    MELODY_READY,
+    MELODY_PROCESSING,
+    MELODY_COMPLETE,
 };
 
-class MelodyPlayer
+class TunePlayer
 {
     uint8_t speakerPin;
 
@@ -58,13 +57,13 @@ class MelodyPlayer
     void _playMelodyWithoutDelay();
 
 public:
-    MelodyPlayer(uint8_t speakerPin);
+    TunePlayer(uint8_t speakerPin);
     void playMelody(MELODY name);
     void setActiveMelody(MELODY name);
     void playMelodyWithoutDelay();
     void stopPlaying();
     void reset();
     boolean playingMelody = false;
-    MELODY currentMelody = READY; // * consider a rename
+    MELODY currentMelody = MELODY_READY; // * consider a rename
 };
 #endif

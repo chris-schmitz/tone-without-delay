@@ -1,71 +1,85 @@
-#include "MelodyPlayer.h"
+#include "TunePlayer.h"
 
-MelodyPlayer::MelodyPlayer(uint8_t pin)
+TunePlayer::TunePlayer(uint8_t pin)
 {
     speakerPin = pin;
 }
 
 // * Shave and a haircut
-int MelodyPlayer::length_shaveAndAHairCut = 9;
-int MelodyPlayer::melody_shaveAndAHairCut[] = {
+int TunePlayer::length_shaveAndAHairCut = 9;
+int TunePlayer::melody_shaveAndAHairCut[] = {
     NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4, 0};
-int MelodyPlayer::durations_shaveAndAHairCut[] = {
+int TunePlayer::durations_shaveAndAHairCut[] = {
     4, 8, 8, 4, 4, 4, 4, 4, 4};
 
 // * READY
-int MelodyPlayer::length_READY = 8;
-int MelodyPlayer::melody_READY[] = {
+int TunePlayer::length_READY = 8;
+int TunePlayer::melody_READY[] = {
     NOTE_C3, NOTE_C3, 0, NOTE_C4, NOTE_C4, 0, NOTE_C3, NOTE_C3};
-int MelodyPlayer::durations_READY[] = {
+int TunePlayer::durations_READY[] = {
     16, 16, 8, 16, 16, 8, 16, 16};
 
 // * PROCESSING
-int MelodyPlayer::length_PROCESSING = 8;
-int MelodyPlayer::melody_PROCESSING[] = {
+int TunePlayer::length_PROCESSING = 8;
+int TunePlayer::melody_PROCESSING[] = {
     NOTE_C3, NOTE_D3, NOTE_E3, NOTE_D3, NOTE_C3, NOTE_D3, NOTE_E3, NOTE_D3};
-int MelodyPlayer::durations_PROCESSING[] = {
+int TunePlayer::durations_PROCESSING[] = {
     8, 8, 8, 8, 8, 8, 8, 8};
 
 // * COMPLETE
-int MelodyPlayer::length_COMPLETE = 4;
-int MelodyPlayer::melody_COMPLETE[] = {
+int TunePlayer::length_COMPLETE = 4;
+int TunePlayer::melody_COMPLETE[] = {
     NOTE_C4, NOTE_C4, NOTE_C4, NOTE_C4};
-int MelodyPlayer::durations_COMPLETE[] = {
+int TunePlayer::durations_COMPLETE[] = {
     8, 8, 8, 2};
 
 // * IDLE
-int MelodyPlayer::length_IDLE = 14;
-int MelodyPlayer::melody_IDLE[] = {
+int TunePlayer::length_IDLE = 14;
+int TunePlayer::melody_IDLE[] = {
     NOTE_C3, NOTE_C3, NOTE_C3, NOTE_E3, NOTE_C3, NOTE_F3, NOTE_G3, 0, NOTE_G3, NOTE_G3, NOTE_F3, NOTE_D3, NOTE_E3, NOTE_C3};
-int MelodyPlayer::durations_IDLE[] = {
+int TunePlayer::durations_IDLE[] = {
     8, 4, 8, 8, 8, 8, 4, 2, 8, 4, 8, 8, 8, 8};
 
 /**
  * * Play a given melody per the passed in enum.
  * * Params:
- * * MELODY name The MELODY enum valu
+ * * MELODY name The MELODY enum value
  */
-void MelodyPlayer::playMelody(MELODY name)
+void TunePlayer::playMelody(MELODY name)
 {
     setActiveMelody(name);
     _playMelody();
 }
 
-void MelodyPlayer::playMelodyWithoutDelay()
+/**
+ * * Plays the set melody without using `delay()`.
+ * ! Note that you need to use `setActiveMelody()` to, you know, set the active melody
+ * ! before you call this method.
+ */
+void TunePlayer::playMelodyWithoutDelay()
 {
     if (playingMelody == true)
-    // if (playingMelody == true && _playComplete == false)
     {
         _currentMillis = millis();
         _playMelodyWithoutDelay();
     }
 }
-void MelodyPlayer::stopPlaying()
+
+/**
+ * * Stop the play of the current melody,
+ * * Note that this essentially acts as a pause, if you fire `playMelodyWithoutDelay()` again
+ * * without resetting or setting a new melody the player will pick up where it left off.
+ * ^ Theoretcially, I haven't actually tried this out and current me can't be bothered to test yet ;P
+ */
+void TunePlayer::stopPlaying()
 {
     playingMelody = false;
 }
 
-void MelodyPlayer::reset()
+/**
+ * * Reset the player state so it's ready to play a new melody.
+ */
+void TunePlayer::reset()
 {
     _activeNote = 0;
     _playComplete = false;
@@ -78,7 +92,7 @@ void MelodyPlayer::reset()
  * ! note that the melody desired should be set in the
  * ! active pointer properties before this method is called
  */
-void MelodyPlayer::_playMelody()
+void TunePlayer::_playMelody()
 {
     // * pulled from the toneMelody arduino example
     for (int thisNote = 0; thisNote < activeLength; thisNote++)
@@ -103,7 +117,7 @@ void MelodyPlayer::_playMelody()
     }
 }
 
-void MelodyPlayer::_playMelodyWithoutDelay()
+void TunePlayer::_playMelodyWithoutDelay()
 {
     // * Not ready for change, kick out early
     if (_currentMillis < _nextChange)
@@ -149,42 +163,37 @@ void MelodyPlayer::_playMelodyWithoutDelay()
     _nextChange = _currentMillis + millisTillNextChange;
 }
 
-void MelodyPlayer::setActiveMelody(MELODY name)
+void TunePlayer::setActiveMelody(MELODY name)
 {
-    // ?! is this the right spot for this??
-    // * naming wise I don't think it is, but logic wise it might be
-    // TODO: consder if this needs a rename or moving the trigger out
+    // ? PASTE ME: is this the right spot for this??
+    // * PASTE ME: naming wise I don't think it is, but logic wise it might be
+    // * PRESENT ME: HAHAHAHA IT'S WORKING AND I COULD CARE LESS AT THE MOMENT! LET FUTURE ME WORRY ABOUT IT!
     playingMelody = true;
 
     currentMelody = name;
     switch (name)
     {
-    case SHAVE_AND_A_HAIRCUT:
-        Serial.println("Shave and a hair cut");
+    case MELODY_SHAVE_AND_A_HAIRCUT:
         activeLength = length_shaveAndAHairCut;
         activeMelody = melody_shaveAndAHairCut;
         activeDurations = durations_shaveAndAHairCut;
         break;
-    case READY:
-        Serial.println("Playing melody: READY");
+    case MELODY_READY:
         activeLength = length_READY;
         activeMelody = melody_READY;
         activeDurations = durations_READY;
         break;
-    case PROCESSING:
-        Serial.println("Playing melody: PROCESSING");
+    case MELODY_PROCESSING:
         activeLength = length_PROCESSING;
         activeMelody = melody_PROCESSING;
         activeDurations = durations_PROCESSING;
         break;
-    case COMPLETE:
-        Serial.println("Playing melody: COMPLETE");
+    case MELODY_COMPLETE:
         activeLength = length_COMPLETE;
         activeMelody = melody_COMPLETE;
         activeDurations = durations_COMPLETE;
         break;
-    case IDLE:
-        Serial.println("Playing melody: IDLE");
+    case MELODY_IDLE:
         activeLength = length_IDLE;
         activeMelody = melody_IDLE;
         activeDurations = durations_IDLE;

@@ -1,10 +1,14 @@
 #include <Adafruit_NeoPixel.h>
-#include "src/melodyPlayer/MelodyPlayer.h"
+#include "src/tunePlayer/TunePlayer.h"
 
 const int SPEAKER = 3;
 const int LEDs = 2;
 
-MelodyPlayer player = MelodyPlayer(SPEAKER);
+// * adding this in to test out the melody switching
+#define BUTTON 1
+int buttonState = 0;
+
+TunePlayer player = TunePlayer(SPEAKER);
 Adafruit_NeoPixel bar = Adafruit_NeoPixel(8, LEDs, NEO_GRB + NEO_KHZ800);
 
 // * State management for the lights
@@ -31,58 +35,82 @@ MELODY melodyToPlay;
 
 void setup()
 {
-    player.playMelody(READY);
+    player.playMelody(MELODY_READY);
     Serial.begin(9600);
+    // * Leaving in for troubleshooting
     // while (!Serial)
     //     ;
     bar.begin();
     bar.show();
     showReady();
+
+    // * temp add for button testing
+    attachInterrupt(BUTTON, rotateGameState, RISING);
 }
 
 void loop()
 {
+
     unsigned long currentMillis = millis();
     handleLights(currentMillis);
 
-    // | is the current tone playing the same as the current state? Note that the player should retain the state even after song is played
+    // * The gist of the logic:
+    // * is the current tone playing the same as the current state? Note that the player should retain the state even after song is played
+    // | yes => continue playing
+    // ^ no:
+    // ^ stop playing current melody
+    // ^ reset player state (playcount, active note, anything else?)
+    // ^ set the new melody
+    // ^ trigger play (will play once and stop)
+
     // * mapping the game state enum to the melody enum, really we could prob
     // * conflate the two enums, but I kind of like the flexibility of mapping
     // * them together for now
     switch (currentGameState)
     {
     case GS_IDLE:
-        melodyToPlay = IDLE;
+        melodyToPlay = MELODY_IDLE;
         break;
     case GS_START:
-        melodyToPlay = READY;
+        melodyToPlay = MELODY_READY;
         break;
     case GS_PROCESSING:
-        melodyToPlay = PROCESSING;
+        melodyToPlay = MELODY_PROCESSING;
         break;
     case GS_COMPLETE:
-        melodyToPlay = COMPLETE;
+        melodyToPlay = MELODY_COMPLETE;
         break;
     }
 
     if (player.currentMelody == melodyToPlay)
     {
-        // | yes => continue playing
-        Serial.println("in the if ");
         player.playMelodyWithoutDelay();
     }
     else
     {
-        Serial.println("in the else ");
-        // ^ no:
-        // ^ stop playing current melody
         player.stopPlaying();
-        // ^ reset player state (playcount, active note, anything else?)
         player.reset();
-        // ^ set the new melody
         player.setActiveMelody(melodyToPlay);
-        // ^ trigger play (will play once and stop)
         player.playMelodyWithoutDelay();
+    }
+}
+
+void rotateGameState()
+{
+    switch (currentGameState)
+    {
+    case GS_IDLE:
+        currentGameState = GS_START;
+        break;
+    case GS_START:
+        currentGameState = GS_PROCESSING;
+        break;
+    case GS_PROCESSING:
+        currentGameState = GS_COMPLETE;
+        break;
+    case GS_COMPLETE:
+        currentGameState = GS_IDLE;
+        break;
     }
 }
 
@@ -102,7 +130,7 @@ void showReady()
         delay(100);
     }
 
-    player.playMelody(READY);
+    player.playMelody(MELODY_READY);
 }
 
 void handleLights(unsigned long currentMillis)
